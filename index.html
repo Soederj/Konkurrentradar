@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konkurrentradar – Wrknest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   WRKNEST-TEMA – färger hämtade från wrknest.se
+   ============================================================ */
+:root{
+  --indigo:#333B8F;        /* Primär – knappar, rubriker, logotypton */
+  --indigo-deep:#272E73;   /* Hover/mörkare variant */
+  --navy:#2A3170;          /* Rubriker/brödtext mörk */
+  --cream:#F6F0E6;         /* Krämvit bas (header, bakgrund) */
+  --cream-deep:#EFE7D9;    /* Mörkare kräm (paneler, hover) */
+  --pink:#F3CBD3;          /* Rosa accentyta */
+  --pink-deep:#A64D63;     /* Mörkrosa text på rosa */
+  --orange:#E77C41;        /* Orange accent */
+  --orange-soft:#FBE3D4;   /* Ljus orange bakgrund */
+  --orange-deep:#B4551F;   /* Mörk orange text */
+  --ink:#2A3170;
+  --bg:#F6F0E6;
+  --card:#FFFFFF;
+  --line:#E3D9C8;
+  --muted:#6B6E8C;
+  --radius:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;}
+a{color:var(--indigo)}
+button{font-family:inherit;cursor:pointer}
+/* Header i sajtens stil: kräm + serif + rosa/orange diagonal */
+header{background:var(--cream);border-bottom:1px solid var(--line);padding:34px 24px 30px;position:relative;overflow:hidden;}
+header::after{content:"";position:absolute;top:0;right:-40px;width:220px;height:100%;background:linear-gradient(105deg,var(--pink) 0 55%,var(--orange) 55% 100%);transform:skewX(-14deg);opacity:.9;}
+.header-inner{max-width:1060px;margin:0 auto;position:relative;z-index:1}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--navy);opacity:.75;margin-bottom:8px;}
+header h1{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:40px;letter-spacing:-0.01em;color:var(--navy);display:flex;align-items:center;gap:14px;line-height:1.1;}
+header h1 .dot{width:12px;height:12px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 5px rgba(231,124,65,.22);display:inline-block;animation:pulse 2.4s infinite;flex:none;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 5px rgba(231,124,65,.22)}50%{box-shadow:0 0 0 9px rgba(231,124,65,.07)}}
+@media (prefers-reduced-motion: reduce){header h1 .dot{animation:none}}
+header p{color:var(--navy);opacity:.78;margin-top:10px;font-size:14.5px;max-width:620px}
+main{max-width:1060px;margin:0 auto;padding:22px 24px 64px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;}
+.panel h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);margin-bottom:13px;}
+.company-grid{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--cream);border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:500;color:var(--muted);transition:all .12s;user-select:none;}
+.chip:hover{border-color:var(--indigo)}
+.chip.on{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+.chip .cnt{font-weight:700;margin-left:6px;color:var(--orange);}
+.chip.on .cnt{color:#FFC9A6}
+.select-row{display:flex;gap:16px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+.linklike{background:none;border:none;color:var(--indigo);font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:2px 0;}
+.controls{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.12em;}
+select,input[type=text]{font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;color:var(--ink);min-width:160px;}
+select:focus,input:focus,button:focus-visible{outline:2px solid var(--indigo);outline-offset:1px}
+.btn-primary{background:var(--indigo);color:#fff;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:13px 28px;transition:background .12s;}
+.btn-primary:hover{background:var(--indigo-deep)}
+.btn-primary:disabled{opacity:.55;cursor:wait}
+.btn-ghost{background:#fff;border:1px solid var(--line);border-radius:var(--radius);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:12px 20px;color:var(--navy);}
+.btn-ghost:hover{border-color:var(--indigo);color:var(--indigo)}
+.progress-wrap{margin-top:14px;display:none}
+.progress-wrap.show{display:block}
+.progress-bar{height:5px;border-radius:3px;background:var(--cream-deep);overflow:hidden;}
+.progress-fill{height:100%;width:0%;background:var(--orange);transition:width .25s;}
+.progress-label{font-size:13px;color:var(--muted);margin-top:6px}
+.result-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#fff;flex-wrap:wrap}
+.seg button{background:none;border:none;padding:9px 16px;font-size:13px;font-weight:500;color:var(--muted);border-right:1px solid var(--line);}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--indigo);color:#fff}
+.result-count{font-size:13.5px;color:var(--muted)}
+.result-count strong{color:var(--navy)}
+.ad{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:4px 16px;}
+.ad .company{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--orange-deep);}
+.ad .company .emp{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+.ad h3{font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:600;line-height:1.35;margin:3px 0 5px}
+.ad h3 a{color:var(--navy);text-decoration:none}
+.ad h3 a:hover{color:var(--indigo);text-decoration:underline;text-underline-offset:3px}
+.ad .meta{font-size:13px;color:var(--muted)}
+.ad .meta span+span::before{content:"·";margin:0 7px;color:var(--line)}
+.badge{align-self:start;justify-self:end;font-size:12px;font-weight:600;padding:5px 12px;border-radius:999px;white-space:nowrap;}
+.badge.named{background:var(--orange-soft);color:var(--orange-deep)}
+.badge.anon{background:var(--pink);color:var(--pink-deep)}
+.badge.unknown{background:var(--cream-deep);color:var(--muted)}
+.badge .client{font-weight:700}
+.ad .links{grid-column:2;justify-self:end;align-self:end;display:flex;gap:12px;align-items:baseline}
+.ad .links a{font-size:13px;font-weight:600}
+.ad .links a.sec{font-size:12px;font-weight:500;color:var(--muted)}
+.empty,.error-box{text-align:center;color:var(--muted);padding:40px 20px;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);}
+footer{max-width:1060px;margin:0 auto;padding:0 24px 32px;font-size:12.5px;color:var(--muted);}
+@media (max-width:640px){.ad{grid-template-columns:1fr}.badge{justify-self:start;margin-top:4px}.ad .links{grid-column:1;justify-self:start}header h1{font-size:30px}header::after{display:none}}
+</style>
+</head>
+<body>
+<header><div class="header-inner">
+<div class="eyebrow">The Wrknest [wɜːk.nest] Radar</div>
+<h1><span class="dot"></span>Konkurrentradar</h1>
+<p>Nya annonser i Platsbanken från topp 25-kompetensföretagen inom white collar. Länkarna går till företagens egna annonssidor. Filtrera på om slutkunden är utpekad eller inte.</p>
+</div></header>
+<main>
+<section class="panel">
+<h2>Bevakade företag</h2>
+<div class="select-row"><button class="linklike" id="selAll">Markera alla</button><button class="linklike" id="selNone">Avmarkera alla</button></div>
+<div class="company-grid" id="companyGrid"></div>
+</section>
+<section class="panel">
+<h2>Sökning</h2>
+<div class="controls">
+<div class="field"><label for="timeWindow">Tidsfönster</label>
+<select id="timeWindow"><option value="12">Senaste 12 timmarna</option><option value="24" selected>Senaste 24 timmarna</option><option value="48">Senaste 48 timmarna</option><option value="168">Senaste 7 dagarna</option></select></div>
+<div class="field"><label for="placeFilter">Ort / län (valfritt)</label><input type="text" id="placeFilter" placeholder="t.ex. Stockholm"></div>
+<button class="btn-primary" id="scanBtn">Skanna annonser</button>
+<button class="btn-ghost" id="csvBtn" style="display:none">Exportera CSV</button>
+</div>
+<div class="progress-wrap" id="progressWrap"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div><div class="progress-label" id="progressLabel"></div></div>
+</section>
+<section id="resultSection" style="display:none">
+<div class="result-toolbar">
+<div class="seg" id="typeSeg"><button data-type="all" class="on">Alla</button><button data-type="named">Namngiven kund</button><button data-type="nonamed">Utan kundnamn</button></div>
+<div class="result-count" id="resultCount"></div>
+</div>
+<div id="resultList"></div>
+</section>
+</main>
+<footer>Data: Arbetsförmedlingens öppna JobSearch-API (Platsbanken). Annonser som konkurrenterna bara publicerar på egna sajter eller LinkedIn syns inte här. Klassificeringen namngiven/dold kund bygger på textmönster i annonsen och är en fingervisning – öppna alltid annonsen för att verifiera. "Kund ej identifierad" = inget kundnamn kunde utläsas ur annonstexten – det kan ändå finnas en namngiven kund, så dessa är värda att öppna manuellt.</footer>
+<script>
+'use strict';
+
+/* Kundklassificering v4 – striktare:
+   - Rollord identifieras på svenska titel-ändelser (-ansvarig, -koordinator, -chef ...)
+   - Bransch-/generiska ord blockeras (B2B, Fund, Accounting, IT, Sales ...)
+   - Upprepnings-regeln (C) kräver att ordet står i FÖRETAGSSAMMANHANG i brödtexten
+     (efter hos/på/till/för/åt/via eller följt av bolagssuffix)
+   - Rubrik-regeln (B) hoppar över inledande gemena adjektiv ("till innovativa Mips") */
+
+const STOPWORDS = new Set(['Vi','Du','Det','Den','De','Som','Är','Har','Denna','Detta','Här','Nu','Nästa','Deras','Vår','Vårt','Våra','Din','Ditt','Dina','Söker','Sökes','Inom','Med','Till','Och','Ett','En','Om','Just','Dig','Oss','Er','Företaget','Företag','Bolaget','Bolag','Kunden','Kund','Kunder','Uppdraget','Uppdrag','Uppdragsgivaren','Arbetsgivaren','Tjänsten','Rollen','Anställningen','Vem','Vad','Var','Hur','Varför','Januari','Februari','Mars','April','Maj','Juni','Juli','Augusti','September','Oktober','November','December','Nya','Nytt','Ny','Spännande','Innovativa','Ledande','Global','Framtidens']);
+
+const LOCATIONS = new Set(['Stockholm','Göteborg','Malmö','Uppsala','Visby','Solna','Lund','Västerås','Örebro','Linköping','Norrköping','Helsingborg','Jönköping','Umeå','Gävle','Borås','Södertälje','Eskilstuna','Karlstad','Täby','Växjö','Halmstad','Sundsvall','Luleå','Trollhättan','Östersund','Borlänge','Falun','Kalmar','Kristianstad','Skövde','Uddevalla','Sverige','Norden','Skåne','Norrland','Kista','Sundbyberg','Nacka','Bromma','Sollentuna','Huddinge','Gotland','Norge','Danmark','Finland','Oslo','Köpenhamn','Järfälla','Rosersberg','Jordbro','Kungsbacka','Mölndal','Sigtuna','Upplands','Arlanda','Kungens','Barkarby']);
+
+/* Bransch-/generiska ord som ALDRIG är kundnamn i sig */
+const DOMAIN_TERMS = new Set(['B2B','B2C','D2C','SaaS','PaaS','Fund','Funds','Accounting','Finance','Financial','HR','IT','ICT','Marketing','Sales','Business','Intelligence','Analytics','Compliance','Payroll','Onboarding','Support','Service','Services','Operations','Logistics','Supply','Procurement','Tech','Technology','Engineering','Development','Consulting','Recruitment','Staffing','Management','Digital','Data','Cloud','Security','Design','Product','Project','Program','Quality','Production','Warehouse','Retail','Ecommerce','Fintech','Insurtech','Proptech','Medtech','Deltid','Heltid','Vikariat','Konsultuppdrag','Interim','Sommarjobb','Extrajobb','Trainee','Praktik','Junior','Senior','Lead','Head','Team','Office','Back','Front','Fullstack','Backend','Frontend','Automation','Embedded','Nord','Syd','Väst','Öst','Region','Norr','Söder']);
+
+/* Svenska titel-/rolländelser (gemener) */
+const ROLE_SUFFIX = /(ansvarig|koordinator|samordnare|ledare|chef|chefen|assistent|assistenten|administratör|handläggare|ekonom|förvaltare|utvecklare|tekniker|ingenjör|ingenjören|konsult|konsulten|specialist|specialisten|redaktör|kommunikatör|designer|analytiker|strateg|rådgivare|säljare|medarbetare|arbetare|operatör|montör|skötare|förare|mästare|planerare|inköpare|controller|sköterska|pedagog|lärare|terapeut|receptionist|koordinatorn|installatör|snickare|elektriker|svetsare|maskinoperatör|processoperatör|drifttekniker|servicetekniker|fastighetstekniker|fastighetsskötare|lokalvårdare|städare|projektledare|produktchef|marknadschef|försäljningschef|redovisningsekonom|löneadministratör|orderadministratör|kundtjänstmedarbetare|webbredaktör|marknadskommunikatör|portföljförvaltare|fondförvaltare|kontorskoordinator|installationsansvarig)$/i;
+
+const NAME = "[A-ZÅÄÖ][\\wÅÄÖåäö&.\\-]+(?:\\s+(?:[A-ZÅÄÖ][\\wÅÄÖåäö&.\\-]+|AB|AS|ASA|Group|Sverige|Sweden|Nordic|Scandinavia|International|Norden)){0,3}";
+const NAME_STICKY = new RegExp(NAME, "y");
+const LEADINS = ['hos vår kund','till vår kund','för vår kund','åt vår kund','vår kund','kunden är','kunden,','uppdrag hos','konsult hos','konsult åt','anställd hos','anställning hos','placering hos','placeras hos','uthyrd till','hyrs ut till','arbeta hos','jobba hos','arbeta för','hos företaget','till företaget','hos bolaget','till bolaget','hos organisationen','rekrytering till'];
+const HEADLINE_LEADINS = ['till','hos','på uppdrag av','för'];
+const CORP = '(?:AB|AS|ASA|Group|Gruppen|Koncernen|Holding|Sweden|Sverige|Nordic|Norden|Scandinavia|International)';
+
+const ANON_PATTERNS = [/\bför\s+(?:en\s+)?kunds?\s+räkning\b/i,/\bvår\s+kund\b(?!\s+[A-ZÅÄÖ])/i,/\bvåra\s+kunder\b/i,/\ben\s+av\s+våra\s+(?:kunder|uppdragsgivare|kundföretag)\b/i,/\bvår\s+uppdragsgivare\b(?!\s+[A-ZÅÄÖ])/i,/\bvårt?\s+kundföretag\b/i,/\bkundföretaget\b/i,/\bhos\s+(?:vår\s+kund|kunden)\b(?!\s+[A-ZÅÄÖ])/i,/\bkonfidentiell/i,/\banonym(?:t|a)?\b/i,/\bett\s+(?:välkänt|ledande|globalt|internationellt|marknadsledande|stort|expansivt|framgångsrikt|etablerat|välrenommerat|spännande)\s+(?:företag|bolag)\b/i,/\ben\s+(?:ledande|välkänd|global|etablerad)\s+aktör\b/i,/\btill\s+(?:en\s+)?kund\b(?!\s*[A-ZÅÄÖ])/i,/\båt\s+(?:en\s+)?kund\b/i,/\buppdrag\s+hos\s+kund\b/i];
+const CLIENT_CONTEXT = /\b(vår kund|våra kunder|vår uppdragsgivare|uppdragsgivaren|kundföretag|kundens|hos kunden|för kund|konsultuppdrag|konsult åt|uthyrd|bemanningsuppdrag|hyrs ut)\b/i;
+
+function reEsc(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function isStaffingWord(s, terms){
+  const low = s.toLowerCase();
+  for (const t of terms){ const tl=t.toLowerCase(); if (low.includes(tl)||tl.includes(low)) return true; for (const w of tl.split(/\s+/)) if (w.length>2 && low===w) return true; }
+  return false;
+}
+function looksLikeRole(word){ return ROLE_SUFFIX.test(word); }
+function isBadToken(tok, ctx){
+  if (STOPWORDS.has(tok) || LOCATIONS.has(tok) || DOMAIN_TERMS.has(tok)
+      || ctx.dynamicLocations.has(tok.toLowerCase()) || looksLikeRole(tok)
+      || isStaffingWord(tok, ctx.staffingTerms)) return true;
+  if (tok.includes('-')){ // sammansatt: "Sales-team", "IT-avdelningen"
+    for (const part of tok.split('-')){
+      if (!part) continue;
+      if (DOMAIN_TERMS.has(part) || STOPWORDS.has(part) || LOCATIONS.has(part)
+          || looksLikeRole(part) || ctx.dynamicLocations.has(part.toLowerCase())) return true;
+    }
+  }
+  return false;
+}
+function cleanName(raw){
+  let n = raw.trim().split(/\.\s/)[0];
+  n = n.replace(/[\s.,;:!?)»"'–—-]+$/,'');
+  n = n.replace(/\s+(och|som|där|för|med|i|på|är|har|samt|en|ett|Var|Vi|Bli|Ta|Din|Nu)$/,'').trim();
+  return n;
+}
+function trimTokens(name, ctx){
+  let parts = name.split(/\s+/);
+  while (parts.length > 1){
+    const last = parts[parts.length-1];
+    if (isBadToken(last, ctx)) parts.pop(); else break;
+  }
+  return parts.join(' ');
+}
+function nameIsValid(name, ctx){
+  if (!name || name.length < 3) return false;
+  if (!/^[A-ZÅÄÖ]/.test(name)) return false;
+  const parts = name.split(/\s+/);
+  const first = parts[0];
+  if (isBadToken(first, ctx)) return false;
+  if (parts.length === 1 && looksLikeRole(name)) return false;
+  if (isStaffingWord(name, ctx.staffingTerms)) return false;
+  return true;
+}
+/* Står token i ett företagssammanhang i brödtexten? (för upprepnings-regeln) */
+function hasCompanyContext(tok, body){
+  const t = reEsc(tok);
+  if (new RegExp('(?:^|[^\\wÅÄÖåäö])(?:hos|på|till|för|åt|via|med|inom koncernen)\\s+' + t + '(?:$|[^\\wÅÄÖåäö])').test(body)) return true;
+  if (new RegExp('(?:^|[^\\wÅÄÖåäö])' + t + '\\s+' + CORP + '(?:$|[^\\wÅÄÖåäö])').test(body)) return true;
+  if (new RegExp('(?:^|[^\\wÅÄÖåäö])' + t + "['’]?s\\b").test(body)) return true; // genitiv "PayEx's"
+  return false;
+}
+function extractAfter(text, leadins, ctx, wordBoundary){
+  for (const lead of leadins){
+    const re = new RegExp((wordBoundary?'(?:^|[\\s,–—-])':'') + reEsc(lead) + '\\s+', 'gi');
+    let m;
+    while ((m = re.exec(text))){
+      let idx = re.lastIndex;
+      if (wordBoundary){ // hoppa över upp till 2 inledande gemena ord ("till innovativa Mips")
+        const rest = text.slice(idx);
+        const skip = rest.match(/^(?:[a-zåäö][\wåäö]+\s+){1,2}/);
+        if (skip) idx += skip[0].length;
+      }
+      NAME_STICKY.lastIndex = idx;
+      const nm = NAME_STICKY.exec(text);
+      if (nm){
+        const name = trimTokens(cleanName(nm[0]), ctx);
+        if (nameIsValid(name, ctx)) return name;
+      }
+    }
+  }
+  return null;
+}
+function headlineRepeatName(headline, body, ctx){
+  const tokens = [...new Set((headline.match(/[A-ZÅÄÖ][\wÅÄÖåäö&.\-]{2,}/g) || []))];
+  let best=null, bestCount=0;
+  for (const tok of tokens){
+    if (isBadToken(tok, ctx)) continue;
+    if (looksLikeRole(tok)) continue;
+    const re = new RegExp('(^|[^\\wÅÄÖåäö])' + reEsc(tok) + '($|[^\\wÅÄÖåäö])','g');
+    const count = (body.match(re) || []).length;
+    if (count >= 2 && hasCompanyContext(tok, body) && count > bestCount){ best=tok; bestCount=count; }
+  }
+  return best;
+}
+function classifyClient(headline, description, staffingTerms, municipality, region){
+  headline = headline || ''; description = description || '';
+  const text = (headline + '\n' + description).slice(0, 8000);
+  const body = description.slice(0, 8000);
+  const lower = text.toLowerCase();
+  const dynamicLocations = new Set();
+  for (const loc of [municipality, region]) if (loc) for (const w of String(loc).split(/[\s,\/]+/)) if (w.length>2) dynamicLocations.add(w.toLowerCase());
+  const ctx = { staffingTerms: staffingTerms||[], dynamicLocations };
+
+  let name = extractAfter(text, LEADINS, ctx, false);           // A) ledtext i texten
+  if (name) return { type:'named', client:name };
+  name = extractAfter(headline, HEADLINE_LEADINS, ctx, true);   // B) rubrik "… till X"
+  if (name) return { type:'named', client:name };
+  name = headlineRepeatName(headline, body, ctx);               // C) rubriknamn + företagskontext
+  if (name) return { type:'named', client:name };
+
+  for (const re of ANON_PATTERNS) if (re.test(lower)) return { type:'anon', client:null };
+  if (CLIENT_CONTEXT.test(lower)) return { type:'anon', client:null };
+  return { type:'unknown', client:null };
+}
+
+
+
+    /* ===== Företagslista: Topp 25 White Collar Q1 2026 ===== */
+    const COMPANIES = [
+      { name:'Perido', terms:['Perido'] },
+      { name:'Manpower', terms:['Manpower'] },
+      { name:'Academic Work', terms:['Academic Work'] },
+      { name:'Randstad', terms:['Randstad'] },
+      { name:'Poolia/Uniflex', terms:['Poolia','Uniflex'] },
+      { name:'Arena Personal', terms:['Arena Personal'] },
+      { name:'Adecco', terms:['Adecco'] },
+      { name:'Ogunsen/SJR', terms:['Ogunsen','SJR'] },
+      { name:'Framtiden i Sverige', terms:['Framtiden'] },
+      { name:'Bemannia', terms:['Bemannia'] },
+      { name:'Skill', terms:['Skill'] },
+      { name:'Jurek', terms:['Jurek'] },
+      { name:'OnePartnerGroup', terms:['OnePartnerGroup'] },
+      { name:'Bravura', terms:['Bravura'] },
+      { name:'StudentConsulting', terms:['StudentConsulting'] },
+      { name:'A-hub', terms:['A-hub'] },
+      { name:'TNG Group', terms:['TNG'] },
+      { name:'Eccera Professionals', terms:['Eccera'] },
+      { name:'Eterni Sweden', terms:['Eterni'] },
+      { name:'Clockwork', terms:['Clockwork'] },
+      { name:'RA Hospitality', terms:['RA Hospitality','Restaurang Assistans'] },
+      { name:'Fasticon Kompetens', terms:['Fasticon'] },
+      { name:'MultiMind', terms:['MultiMind'] },
+      { name:'People Productions', terms:['People Productions'] },
+      { name:'Calviks', terms:['Calviks'] },
+    ];
+    const API = 'https://jobsearch.api.jobtechdev.se/search';
+    const STORAGE_KEY = 'konkurrentradar_selected_v2';
+
+    let selected = new Set(COMPANIES.map(c => c.name));
+    let allAds = [];
+    let typeFilter = 'all';
+    try { const s = JSON.parse(localStorage.getItem(STORAGE_KEY)); if (Array.isArray(s) && s.length) selected = new Set(s); } catch(e){}
+
+    function persist(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...selected])); } catch(e){} }
+    function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function reEscW(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+
+    /* Matcha att annonsens arbetsgivare verkligen ÄR bemanningsbolaget */
+    function employerMatches(hit, term){
+      const re = new RegExp('(^|[^a-zåäö])' + reEscW(term.toLowerCase()) + '($|[^a-zåäö])');
+      const name = ((hit.employer && hit.employer.name) || '').toLowerCase();
+      const wp   = ((hit.employer && hit.employer.workplace) || '').toLowerCase();
+      return re.test(name) || re.test(wp);
+    }
+
+    /* Välj bästa länk till företagets egen annonssida */
+    function pickCompanyUrl(hit){
+      const app = hit.application_details && hit.application_details.url;
+      if (app && /^https?:\/\//i.test(app)) {
+        // undvik rena af.se/arbetsformedlingen-länkar som "företagssida"
+        if (!/arbetsformedlingen\.se/i.test(app)) return app;
+      }
+      if (Array.isArray(hit.source_links)) {
+        const ext = hit.source_links.find(l => l && l.url && !/arbetsformedlingen\.se/i.test(l.url));
+        if (ext) return ext.url;
+      }
+      return null;
+    }
+
+    async function fetchCompany(company, publishedAfter){
+      const out = [];
+      for (const term of company.terms){
+        const url = API + '?q=' + encodeURIComponent(term)
+          + '&published-after=' + encodeURIComponent(publishedAfter)
+          + '&resdet=full&limit=100';
+        const res = await fetch(url, { headers:{ accept:'application/json' } });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        for (const hit of (data.hits || [])){
+          if (employerMatches(hit, term)) out.push(hit);
+        }
+      }
+      return out;
+    }
+
+    async function scan(){
+      const btn = document.getElementById('scanBtn');
+      const wrap = document.getElementById('progressWrap');
+      const fill = document.getElementById('progressFill');
+      const label = document.getElementById('progressLabel');
+      const chosen = COMPANIES.filter(c => selected.has(c.name));
+      if (!chosen.length){ alert('Välj minst ett företag att bevaka.'); return; }
+
+      btn.disabled = true; wrap.classList.add('show'); fill.style.width = '0%';
+      allAds = [];
+      const errors = [], seen = new Set();
+      const hours = parseInt(document.getElementById('timeWindow').value, 10);
+      const publishedAfter = new Date(Date.now() - hours*3600*1000).toISOString().slice(0,19);
+      let done = 0;
+      const queue = chosen.slice();
+
+      async function worker(){
+        while (queue.length){
+          const company = queue.shift();
+          label.textContent = 'Söker: ' + company.name + '  (' + (done+1) + ' av ' + chosen.length + ')';
+          try {
+            for (const hit of await fetchCompany(company, publishedAfter)){
+              if (seen.has(hit.id)) continue;
+              seen.add(hit.id);
+              const desc = (hit.description && hit.description.text) || '';
+              const mun = (hit.workplace_address && hit.workplace_address.municipality) || '';
+              const reg = (hit.workplace_address && hit.workplace_address.region) || '';
+              const cls = classifyClient(hit.headline || '', desc, company.terms, mun, reg);
+              allAds.push({
+                id: hit.id, company: company.name,
+                headline: hit.headline || '(utan rubrik)',
+                companyUrl: pickCompanyUrl(hit),
+                platsbankenUrl: hit.webpage_url || ('https://arbetsformedlingen.se/platsbanken/annonser/' + hit.id),
+                employerName: (hit.employer && hit.employer.name) || '',
+                municipality: (hit.workplace_address && hit.workplace_address.municipality) || '',
+                region: (hit.workplace_address && hit.workplace_address.region) || '',
+                field: (hit.occupation_field && hit.occupation_field.label) || '',
+                occupation: (hit.occupation && hit.occupation.label) || '',
+                published: hit.publication_date || '',
+                type: cls.type, client: cls.client
+              });
+            }
+          } catch(e){ errors.push(company.name); }
+          done++; fill.style.width = Math.round(done/chosen.length*100) + '%';
+        }
+      }
+      await Promise.all(Array.from({length: Math.min(5, chosen.length)}, worker));
+
+      allAds.sort((a,b) => (b.published||'').localeCompare(a.published||''));
+      label.textContent = errors.length
+        ? 'Klart – sökningen misslyckades för: ' + errors.join(', ')
+        : 'Klart. ' + allAds.length + ' annonser hittade.';
+      btn.disabled = false;
+      document.getElementById('csvBtn').style.display = allAds.length ? '' : 'none';
+      renderCompanyGrid(); renderResults();
+    }
+
+    /* ===== Företagschips (endast urval; robust event-delegation) ===== */
+    function renderCompanyGrid(){
+      const grid = document.getElementById('companyGrid');
+      const counts = {};
+      for (const ad of allAds) counts[ad.company] = (counts[ad.company]||0) + 1;
+      const scanned = allAds.length > 0;
+      grid.innerHTML = COMPANIES.map(c => {
+        const on = selected.has(c.name);
+        const cnt = (scanned && on) ? '<span class="cnt">' + (counts[c.name]||0) + '</span>' : '';
+        return '<button type="button" class="chip' + (on?' on':'') + '" data-name="' + esc(c.name) + '">' + esc(c.name) + cnt + '</button>';
+      }).join('');
+    }
+    document.getElementById('companyGrid').addEventListener('click', e => {
+      const chip = e.target.closest('.chip'); if (!chip) return;
+      const name = chip.getAttribute('data-name');
+      if (selected.has(name)) selected.delete(name); else selected.add(name);
+      persist(); renderCompanyGrid();
+    });
+    document.getElementById('selAll').addEventListener('click', () => {
+      selected = new Set(COMPANIES.map(c => c.name)); persist(); renderCompanyGrid();
+    });
+    document.getElementById('selNone').addEventListener('click', () => {
+      selected = new Set(); persist(); renderCompanyGrid();
+    });
+
+    /* ===== Resultat ===== */
+    function relTime(iso){
+      if (!iso) return '';
+      const d = new Date(iso);
+      const h = Math.floor((Date.now()-d.getTime())/3600000);
+      const clock = d.toLocaleString('sv-SE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      if (h < 1) return 'nyss · ' + clock;
+      if (h < 48) return 'för ' + h + ' tim sedan · ' + clock;
+      return clock;
+    }
+    function passesType(ad){
+      if (typeFilter === 'all') return true;
+      if (typeFilter === 'named') return ad.type === 'named';
+      if (typeFilter === 'nonamed') return ad.type === 'anon' || ad.type === 'unknown';
+      return true;
+    }
+    function visibleAds(){
+      const place = document.getElementById('placeFilter').value.trim().toLowerCase();
+      return allAds.filter(ad => {
+        if (!passesType(ad)) return false;
+        if (place && !(ad.municipality.toLowerCase().includes(place) || ad.region.toLowerCase().includes(place))) return false;
+        return true;
+      });
+    }
+    function badgeFor(ad){
+      if (ad.type === 'named') return '<span class="badge named">Kund: <span class="client">' + esc(ad.client || 'utpekad') + '</span></span>';
+      if (ad.type === 'anon')  return '<span class="badge anon">Kund ej utpekad</span>';
+      return '<span class="badge unknown">Kund ej identifierad</span>';
+    }
+    function renderResults(){
+      document.getElementById('resultSection').style.display = '';
+      const list = document.getElementById('resultList');
+      const ads = visibleAds();
+      const named = allAds.filter(a=>a.type==='named').length;
+      const anon  = allAds.filter(a=>a.type==='anon').length;
+      const unknown= allAds.filter(a=>a.type==='unknown').length;
+      document.getElementById('resultCount').innerHTML =
+        '<strong>' + ads.length + '</strong> visas av ' + allAds.length +
+        ' · ' + named + ' med namngiven kund, ' + anon + ' dold kund, ' + unknown + ' ej identifierad';
+
+      if (!allAds.length){ list.innerHTML = '<div class="empty">Inga annonser i valt tidsfönster. Testa ett längre fönster – helger och röda dagar är ofta tysta.</div>'; return; }
+      if (!ads.length){ list.innerHTML = '<div class="empty">Inga annonser matchar de aktiva filtren.</div>'; return; }
+
+      list.innerHTML = ads.map(ad => {
+        const meta = [esc(ad.municipality || ad.region || 'Ort ej angiven'), esc(ad.occupation || ad.field), esc(relTime(ad.published))]
+          .filter(Boolean).map(x => '<span>' + x + '</span>').join('');
+        const primary = ad.companyUrl
+          ? '<a href="' + esc(ad.companyUrl) + '" target="_blank" rel="noopener">Öppna hos ' + esc(ad.company) + ' →</a>'
+          : '<a href="' + esc(ad.platsbankenUrl) + '" target="_blank" rel="noopener">Öppna annonsen →</a>';
+        const secondary = ad.companyUrl
+          ? '<a class="sec" href="' + esc(ad.platsbankenUrl) + '" target="_blank" rel="noopener">Platsbanken</a>' : '';
+        const headlineUrl = ad.companyUrl || ad.platsbankenUrl;
+        return '<article class="ad">' +
+          '<div>' +
+            '<div class="company">' + esc(ad.company) + ' <span class="emp">· ' + esc(ad.employerName) + '</span></div>' +
+            '<h3><a href="' + esc(headlineUrl) + '" target="_blank" rel="noopener">' + esc(ad.headline) + '</a></h3>' +
+            '<div class="meta">' + meta + '</div>' +
+          '</div>' +
+          badgeFor(ad) +
+          '<div class="links">' + primary + secondary + '</div>' +
+        '</article>';
+      }).join('');
+    }
+
+    function exportCsv(){
+      const label = t => t==='named'?'Namngiven kund':(t==='anon'?'Dold kund':'Ej identifierad');
+      const rows = [['Företag','Rubrik','Kundstatus','Utpekad kund','Ort','Län','Yrke','Publicerad','Länk (företag)','Länk (Platsbanken)']];
+      for (const ad of visibleAds()) rows.push([ad.company, ad.headline, label(ad.type), ad.client||'', ad.municipality, ad.region, ad.occupation||ad.field, ad.published, ad.companyUrl||'', ad.platsbankenUrl]);
+      const csv = '\uFEFF' + rows.map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(';')).join('\r\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'konkurrentradar_' + new Date().toISOString().slice(0,10) + '.csv';
+      a.click(); URL.revokeObjectURL(a.href);
+    }
+
+    document.getElementById('scanBtn').addEventListener('click', scan);
+    document.getElementById('csvBtn').addEventListener('click', exportCsv);
+    document.getElementById('placeFilter').addEventListener('input', () => { if (allAds.length) renderResults(); });
+    document.getElementById('typeSeg').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      typeFilter = b.dataset.type;
+      for (const x of document.querySelectorAll('#typeSeg button')) x.classList.toggle('on', x === b);
+      renderResults();
+    });
+
+    renderCompanyGrid();
+
+</script>
+</body>
+</html>
