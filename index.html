@@ -118,7 +118,7 @@ footer{max-width:1060px;margin:0 auto;padding:0 24px 32px;font-size:12.5px;color
 <header><div class="header-inner">
 <div class="eyebrow">The Wrknest [wɜːk.nest] Radar</div>
 <h1><span class="dot"></span>Konkurrentradar</h1>
-<p>Nya annonser i Platsbanken från topp 25-kompetensföretagen inom white collar. Länkarna går till företagens egna annonssidor. Filtrera på om slutkunden är utpekad eller inte.</p>
+<p>Nya annonser i Platsbanken från de bevakade kompetensföretagen inom white collar (Kompetensföretagens topp 25 + egna tillägg). Länkarna går till företagens egna annonssidor. Filtrera på om slutkunden är utpekad eller inte.</p>
 </div></header>
 <main>
 <section class="panel">
@@ -161,15 +161,15 @@ const STOPWORDS = new Set(['Vi','Du','Det','Den','De','Som','Är','Har','Denna',
 const LOCATIONS = new Set(['Stockholm','Göteborg','Malmö','Uppsala','Visby','Solna','Lund','Västerås','Örebro','Linköping','Norrköping','Helsingborg','Jönköping','Umeå','Gävle','Borås','Södertälje','Eskilstuna','Karlstad','Täby','Växjö','Halmstad','Sundsvall','Luleå','Trollhättan','Östersund','Borlänge','Falun','Kalmar','Kristianstad','Skövde','Uddevalla','Sverige','Norden','Skåne','Norrland','Kista','Sundbyberg','Nacka','Bromma','Sollentuna','Huddinge','Gotland','Norge','Danmark','Finland','Oslo','Köpenhamn','Järfälla','Rosersberg','Jordbro','Kungsbacka','Mölndal','Sigtuna','Upplands','Arlanda','Kungens','Barkarby']);
 
 /* Bransch-/generiska ord som ALDRIG är kundnamn i sig */
-const DOMAIN_TERMS = new Set(['B2B','B2C','D2C','SaaS','PaaS','Fund','Funds','Accounting','Finance','Financial','HR','IT','ICT','Marketing','Sales','Business','Intelligence','Analytics','Compliance','Payroll','Onboarding','Support','Service','Services','Operations','Logistics','Supply','Procurement','Tech','Technology','Engineering','Development','Consulting','Recruitment','Staffing','Management','Digital','Data','Cloud','Security','Design','Product','Project','Program','Quality','Production','Warehouse','Retail','Ecommerce','Fintech','Insurtech','Proptech','Medtech','Deltid','Heltid','Vikariat','Konsultuppdrag','Interim','Sommarjobb','Extrajobb','Trainee','Praktik','Junior','Senior','Lead','Head','Team','Office','Back','Front','Fullstack','Backend','Frontend','Automation','Embedded','Nord','Syd','Väst','Öst','Region','Norr','Söder']);
+const DOMAIN_TERMS = new Set(['B2B','B2C','D2C','SaaS','PaaS','Fund','Funds','Accounting','Finance','Financial','HR','IT','ICT','Marketing','Sales','Business','Intelligence','Analytics','Compliance','Payroll','Onboarding','Support','Service','Services','Operations','Logistics','Supply','Procurement','Tech','Technology','Engineering','Development','Consulting','Recruitment','Staffing','Management','Digital','Data','Cloud','Security','Design','Product','Project','Program','Quality','Production','Warehouse','Retail','Ecommerce','Fintech','Insurtech','Proptech','Medtech','Deltid','Heltid','Vikariat','Konsultuppdrag','Interim','Sommarjobb','Extrajobb','Trainee','Praktik','Junior','Senior','Lead','Head','Team','Office','Back','Front','Fullstack','Backend','Frontend','Automation','Embedded','Nord','Syd','Väst','Öst','Region','Norr','Söder','OPS','ERP','CRM','KPI','MES','PLC','SCADA','HMI','WMS','TMS','PLM','CAD','CAM','OEE','HSE','QHSE','EHS','GDPR','ISO','SLA','API','IoT','R&D','FoU','ESG','CSRD','SEO','SEM','CMS','PIM','MDM','EDI','OKR','CNC','LEAN','ITIL']);
 
 /* Svenska titel-/rolländelser (gemener) */
 const ROLE_SUFFIX = /(ansvarig|koordinator|samordnare|ledare|chef|chefen|assistent|assistenten|administratör|handläggare|ekonom|förvaltare|utvecklare|tekniker|ingenjör|ingenjören|konsult|konsulten|specialist|specialisten|redaktör|kommunikatör|designer|analytiker|strateg|rådgivare|säljare|medarbetare|arbetare|operatör|montör|skötare|förare|mästare|planerare|inköpare|controller|sköterska|pedagog|lärare|terapeut|receptionist|koordinatorn|installatör|snickare|elektriker|svetsare|maskinoperatör|processoperatör|drifttekniker|servicetekniker|fastighetstekniker|fastighetsskötare|lokalvårdare|städare|projektledare|produktchef|marknadschef|försäljningschef|redovisningsekonom|löneadministratör|orderadministratör|kundtjänstmedarbetare|webbredaktör|marknadskommunikatör|portföljförvaltare|fondförvaltare|kontorskoordinator|installationsansvarig)$/i;
 
 const NAME = "[A-ZÅÄÖ][\\wÅÄÖåäö&.\\-]+(?:\\s+(?:[A-ZÅÄÖ][\\wÅÄÖåäö&.\\-]+|AB|AS|ASA|Group|Sverige|Sweden|Nordic|Scandinavia|International|Norden)){0,3}";
 const NAME_STICKY = new RegExp(NAME, "y");
-const LEADINS = ['hos vår kund','till vår kund','för vår kund','åt vår kund','vår kund','kunden är','kunden,','uppdrag hos','konsult hos','konsult åt','anställd hos','anställning hos','placering hos','placeras hos','uthyrd till','hyrs ut till','arbeta hos','jobba hos','arbeta för','hos företaget','till företaget','hos bolaget','till bolaget','hos organisationen','rekrytering till'];
-const HEADLINE_LEADINS = ['till','hos','på uppdrag av','för'];
+const LEADINS = ['tillsammans med','hos vår kund','till vår kund','för vår kund','åt vår kund','vår kund','kunden är','kunden,','uppdrag hos','konsult hos','konsult åt','anställd hos','anställning hos','placering hos','placeras hos','uthyrd till','hyrs ut till','arbeta hos','jobba hos','arbeta för','hos företaget','till företaget','hos bolaget','till bolaget','hos organisationen','rekrytering till'];
+const HEADLINE_LEADINS = ['tillsammans med','till','hos','på uppdrag av'];
 const CORP = '(?:AB|AS|ASA|Group|Gruppen|Koncernen|Holding|Sweden|Sverige|Nordic|Norden|Scandinavia|International)';
 
 const ANON_PATTERNS = [/\bför\s+(?:en\s+)?kunds?\s+räkning\b/i,/\bvår\s+kund\b(?!\s+[A-ZÅÄÖ])/i,/\bvåra\s+kunder\b/i,/\ben\s+av\s+våra\s+(?:kunder|uppdragsgivare|kundföretag)\b/i,/\bvår\s+uppdragsgivare\b(?!\s+[A-ZÅÄÖ])/i,/\bvårt?\s+kundföretag\b/i,/\bkundföretaget\b/i,/\bhos\s+(?:vår\s+kund|kunden)\b(?!\s+[A-ZÅÄÖ])/i,/\bkonfidentiell/i,/\banonym(?:t|a)?\b/i,/\bett\s+(?:välkänt|ledande|globalt|internationellt|marknadsledande|stort|expansivt|framgångsrikt|etablerat|välrenommerat|spännande)\s+(?:företag|bolag)\b/i,/\ben\s+(?:ledande|välkänd|global|etablerad)\s+aktör\b/i,/\btill\s+(?:en\s+)?kund\b(?!\s*[A-ZÅÄÖ])/i,/\båt\s+(?:en\s+)?kund\b/i,/\buppdrag\s+hos\s+kund\b/i];
@@ -310,9 +310,12 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
       { name:'MultiMind', terms:['MultiMind'] },
       { name:'People Productions', terms:['People Productions'] },
       { name:'Calviks', terms:['Calviks'] },
+      { name:'Friday', terms:['Friday'] },
+      { name:'Professionals Nord', terms:['Professionals Nord'] },
+      { name:'OIO', terms:['OIO'] },
     ];
     const API = 'https://jobsearch.api.jobtechdev.se/search';
-    const STORAGE_KEY = 'konkurrentradar_selected_v2';
+    const STORAGE_KEY = 'konkurrentradar_selected_v4';
 
     let selected = new Set(COMPANIES.map(c => c.name));
     let allAds = [];
