@@ -91,6 +91,18 @@ select:focus,input:focus,button:focus-visible{outline:2px solid var(--indigo);ou
 .ad .links{grid-column:2;justify-self:end;align-self:end;display:flex;gap:12px;align-items:baseline}
 .ad .links a{font-size:13px;font-weight:600}
 .ad .links a.sec{font-size:12px;font-weight:500;color:var(--muted)}
+.panel h2 .hint{font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted)}
+.client-grid{display:flex;flex-wrap:wrap;gap:8px}
+.client-chip{border:1px solid var(--orange);background:var(--orange-soft);color:var(--orange-deep);border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:600;transition:all .12s;user-select:none}
+.client-chip .n{font-weight:500;opacity:.75;margin-left:5px}
+.client-chip:hover{background:var(--orange);color:#fff}
+.client-chip.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.result-filters{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 14px}
+.chk{font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:7px;user-select:none;cursor:pointer}
+.chk input{accent-color:var(--indigo);width:16px;height:16px}
+.new-badge{display:inline-block;background:var(--orange);color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;border-radius:4px;padding:2px 6px;margin-left:8px;vertical-align:2px}
+.copy-btn{background:none;border:none;color:var(--muted);font-size:12px;font-weight:500;text-decoration:underline;text-underline-offset:2px;padding:0}
+.copy-btn:hover{color:var(--indigo)}
 .empty,.error-box{text-align:center;color:var(--muted);padding:40px 20px;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);}
 footer{max-width:1060px;margin:0 auto;padding:0 24px 32px;font-size:12.5px;color:var(--muted);}
 @media (max-width:640px){
@@ -111,8 +123,22 @@ footer{max-width:1060px;margin:0 auto;padding:0 24px 32px;font-size:12.5px;color
   .seg button{flex:1;padding:10px 8px;min-height:40px}
   .result-toolbar{flex-direction:column;align-items:stretch}
   .ad h3{font-size:16.5px}
+  .result-filters{flex-direction:column;align-items:stretch}
+  .result-filters select{width:100%}
 }
 </style>
+<!-- ============================================================
+     GOOGLE ANALYTICS (GA4)
+     Byt ut G-XXXXXXXXXX på BÅDA ställena nedan mot ditt mät-ID
+     (skapa ny egendom + webbdataström i analytics.google.com)
+     ============================================================ -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
 </head>
 <body>
 <header><div class="header-inner">
@@ -138,9 +164,22 @@ footer{max-width:1060px;margin:0 auto;padding:0 24px 32px;font-size:12.5px;color
 <div class="progress-wrap" id="progressWrap"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div><div class="progress-label" id="progressLabel"></div></div>
 </section>
 <section id="resultSection" style="display:none">
+<div class="panel" id="prospectPanel" style="display:none">
+<h2>Utpekade kunder just nu <span class="hint">– klicka för att filtrera</span></h2>
+<div class="client-grid" id="clientGrid"></div>
+</div>
 <div class="result-toolbar">
 <div class="seg" id="typeSeg"><button data-type="all" class="on">Alla</button><button data-type="named">Namngiven kund</button><button data-type="nonamed">Utan kundnamn</button></div>
 <div class="result-count" id="resultCount"></div>
+</div>
+<div class="result-filters">
+<select id="sortSelect" aria-label="Sortering">
+<option value="time">Senaste först</option>
+<option value="company">Företag (A–Ö)</option>
+<option value="type">Kundtyp (namngivna först)</option>
+</select>
+<select id="fieldSelect" aria-label="Yrkesområde"><option value="">Alla yrkesområden</option></select>
+<label class="chk"><input type="checkbox" id="onlyNew"> Bara nya sedan förra skanningen</label>
 </div>
 <div id="resultList"></div>
 </section>
@@ -148,6 +187,11 @@ footer{max-width:1060px;margin:0 auto;padding:0 24px 32px;font-size:12.5px;color
 <footer>Data: Arbetsförmedlingens öppna JobSearch-API (Platsbanken). Annonser som konkurrenterna bara publicerar på egna sajter eller LinkedIn syns inte här. Klassificeringen namngiven/dold kund bygger på textmönster i annonsen och är en fingervisning – öppna alltid annonsen för att verifiera. "Kund ej identifierad" = inget kundnamn kunde utläsas ur annonstexten – det kan ändå finnas en namngiven kund, så dessa är värda att öppna manuellt.</footer>
 <script>
 'use strict';
+
+    /* ---- Google Analytics-händelser (no-op om GA saknas) ---- */
+    function track(eventName, params){
+      try { if (typeof gtag === 'function') gtag('event', eventName, params || {}); } catch(e){}
+    }
 
 /* Kundklassificering v4 – striktare:
    - Rollord identifieras på svenska titel-ändelser (-ansvarig, -koordinator, -chef ...)
@@ -309,7 +353,6 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
       { name:'Fasticon Kompetens', terms:['Fasticon'] },
       { name:'MultiMind', terms:['MultiMind'] },
       { name:'People Productions', terms:['People Productions'] },
-      { name:'Calviks', terms:['Calviks'] },
       { name:'Friday', terms:['Friday'] },
       { name:'Professionals Nord', terms:['Professionals Nord'] },
       { name:'OIO', terms:['OIO'] },
@@ -320,6 +363,13 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
     let selected = new Set(COMPANIES.map(c => c.name));
     let allAds = [];
     let typeFilter = 'all';
+    let clientFilter = null;   // klick på kundchip
+    let sortMode = 'time';
+    let fieldFilter = '';
+    let onlyNew = false;
+    const SEEN_KEY = 'konkurrentradar_seen_v1';
+    let seenIds = new Set();
+    try { seenIds = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch(e){}
     try { const s = JSON.parse(localStorage.getItem(STORAGE_KEY)); if (Array.isArray(s) && s.length) selected = new Set(s); } catch(e){}
 
     function persist(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...selected])); } catch(e){} }
@@ -351,14 +401,18 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
     async function fetchCompany(company, publishedAfter){
       const out = [];
       for (const term of company.terms){
-        const url = API + '?q=' + encodeURIComponent(term)
-          + '&published-after=' + encodeURIComponent(publishedAfter)
-          + '&resdet=full&limit=100';
-        const res = await fetch(url, { headers:{ accept:'application/json' } });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        for (const hit of (data.hits || [])){
-          if (employerMatches(hit, term)) out.push(hit);
+        for (let offset = 0; offset <= 100; offset += 100){ // max 2 sidor per term
+          const url = API + '?q=' + encodeURIComponent(term)
+            + '&published-after=' + encodeURIComponent(publishedAfter)
+            + '&resdet=full&limit=100&offset=' + offset;
+          const res = await fetch(url, { headers:{ accept:'application/json' } });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          const hits = data.hits || [];
+          for (const hit of hits){
+            if (employerMatches(hit, term)) out.push(hit);
+          }
+          if (hits.length < 100) break; // sista sidan
         }
       }
       return out;
@@ -394,6 +448,7 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
               const cls = classifyClient(hit.headline || '', desc, company.terms, mun, reg);
               allAds.push({
                 id: hit.id, company: company.name,
+                isNew: !seenIds.has(hit.id),
                 headline: hit.headline || '(utan rubrik)',
                 companyUrl: pickCompanyUrl(hit),
                 platsbankenUrl: hit.webpage_url || ('https://arbetsformedlingen.se/platsbanken/annonser/' + hit.id),
@@ -413,11 +468,19 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
       await Promise.all(Array.from({length: Math.min(5, chosen.length)}, worker));
 
       allAds.sort((a,b) => (b.published||'').localeCompare(a.published||''));
+      clientFilter = null;
+      // markera allt som sett inför nästa skanning (behåll max 6000 id:n)
+      for (const ad of allAds) seenIds.add(ad.id);
+      try { localStorage.setItem(SEEN_KEY, JSON.stringify([...seenIds].slice(-6000))); } catch(e){}
+      rebuildFieldSelect();
       label.textContent = errors.length
         ? 'Klart – sökningen misslyckades för: ' + errors.join(', ')
         : 'Klart. ' + allAds.length + ' annonser hittade.';
       btn.disabled = false;
       document.getElementById('csvBtn').style.display = allAds.length ? '' : 'none';
+      track('scan', { companies: chosen.length, hours: hours, results: allAds.length,
+        named: allAds.filter(a=>a.type==='named').length,
+        anon: allAds.filter(a=>a.type==='anon').length });
       renderCompanyGrid(); renderResults();
     }
 
@@ -466,9 +529,38 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
       const place = document.getElementById('placeFilter').value.trim().toLowerCase();
       return allAds.filter(ad => {
         if (!passesType(ad)) return false;
+        if (clientFilter && ad.client !== clientFilter) return false;
+        if (fieldFilter && ad.field !== fieldFilter) return false;
+        if (onlyNew && !ad.isNew) return false;
         if (place && !(ad.municipality.toLowerCase().includes(place) || ad.region.toLowerCase().includes(place))) return false;
         return true;
       });
+    }
+    const TYPE_ORDER = { named:0, anon:1, unknown:2 };
+    function sortAds(ads){
+      if (sortMode === 'company') ads.sort((a,b) => a.company.localeCompare(b.company,'sv') || (b.published||'').localeCompare(a.published||''));
+      else if (sortMode === 'type') ads.sort((a,b) => (TYPE_ORDER[a.type]-TYPE_ORDER[b.type]) || (b.published||'').localeCompare(a.published||''));
+      else ads.sort((a,b) => (b.published||'').localeCompare(a.published||''));
+      return ads;
+    }
+    function rebuildFieldSelect(){
+      const sel = document.getElementById('fieldSelect');
+      const fields = [...new Set(allAds.map(a => a.field).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'sv'));
+      sel.innerHTML = '<option value="">Alla yrkesområden</option>' +
+        fields.map(f => '<option value="' + esc(f) + '">' + esc(f) + '</option>').join('');
+      fieldFilter = '';
+    }
+    function renderClientChips(){
+      const panel = document.getElementById('prospectPanel');
+      const grid = document.getElementById('clientGrid');
+      const counts = {};
+      for (const ad of allAds) if (ad.type === 'named' && ad.client) counts[ad.client] = (counts[ad.client]||0) + 1;
+      const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 40);
+      if (!entries.length){ panel.style.display = 'none'; return; }
+      panel.style.display = '';
+      grid.innerHTML = entries.map(([name,n]) =>
+        '<button type="button" class="client-chip' + (clientFilter===name?' on':'') + '" data-client="' + esc(name) + '">' +
+        esc(name) + '<span class="n">' + n + '</span></button>').join('');
     }
     function badgeFor(ad){
       if (ad.type === 'named') return '<span class="badge named">Kund: <span class="client">' + esc(ad.client || 'utpekad') + '</span></span>';
@@ -478,7 +570,8 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
     function renderResults(){
       document.getElementById('resultSection').style.display = '';
       const list = document.getElementById('resultList');
-      const ads = visibleAds();
+      const ads = sortAds(visibleAds());
+      renderClientChips();
       const named = allAds.filter(a=>a.type==='named').length;
       const anon  = allAds.filter(a=>a.type==='anon').length;
       const unknown= allAds.filter(a=>a.type==='unknown').length;
@@ -501,11 +594,11 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
         return '<article class="ad">' +
           '<div>' +
             '<div class="company">' + esc(ad.company) + ' <span class="emp">· ' + esc(ad.employerName) + '</span></div>' +
-            '<h3><a href="' + esc(headlineUrl) + '" target="_blank" rel="noopener">' + esc(ad.headline) + '</a></h3>' +
+            '<h3><a href="' + esc(headlineUrl) + '" target="_blank" rel="noopener">' + esc(ad.headline) + '</a>' + (ad.isNew ? '<span class="new-badge">NY</span>' : '') + '</h3>' +
             '<div class="meta">' + meta + '</div>' +
           '</div>' +
           badgeFor(ad) +
-          '<div class="links">' + primary + secondary + '</div>' +
+          '<div class="links">' + primary + secondary + '<button type="button" class="copy-btn" data-id="' + esc(ad.id) + '">Kopiera lead</button></div>' +
         '</article>';
       }).join('');
     }
@@ -520,16 +613,59 @@ function classifyClient(headline, description, staffingTerms, municipality, regi
       a.href = URL.createObjectURL(blob);
       a.download = 'konkurrentradar_' + new Date().toISOString().slice(0,10) + '.csv';
       a.click(); URL.revokeObjectURL(a.href);
+      track('csv_export', { rows: visibleAds().length });
     }
 
     document.getElementById('scanBtn').addEventListener('click', scan);
     document.getElementById('csvBtn').addEventListener('click', exportCsv);
     document.getElementById('placeFilter').addEventListener('input', () => { if (allAds.length) renderResults(); });
+    document.getElementById('sortSelect').addEventListener('change', e => { sortMode = e.target.value; renderResults(); });
+    document.getElementById('fieldSelect').addEventListener('change', e => { fieldFilter = e.target.value; renderResults(); });
+    document.getElementById('onlyNew').addEventListener('change', e => { onlyNew = e.target.checked; renderResults(); });
+    document.getElementById('clientGrid').addEventListener('click', e => {
+      const chip = e.target.closest('.client-chip'); if (!chip) return;
+      const name = chip.getAttribute('data-client');
+      clientFilter = (clientFilter === name) ? null : name;
+      track('client_filter', { client: name });
+      renderResults();
+    });
+    function copyText(text){
+      if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch(e){}
+      document.body.removeChild(ta);
+      return Promise.resolve();
+    }
+    document.getElementById('resultList').addEventListener('click', e => {
+      const btn = e.target.closest('.copy-btn'); if (!btn) return;
+      const ad = allAds.find(a => a.id === btn.getAttribute('data-id')); if (!ad) return;
+      const kund = ad.type==='named' ? ('Kund: ' + (ad.client||'utpekad')) : (ad.type==='anon' ? 'Kund ej utpekad' : 'Kund ej identifierad');
+      const text = ad.headline + '\n' + ad.company + ' (' + ad.employerName + ') · ' + kund +
+        ' · ' + (ad.municipality || ad.region || '') + ' · publicerad ' + (ad.published||'').slice(0,16).replace('T',' ') +
+        '\n' + (ad.companyUrl || ad.platsbankenUrl);
+      copyText(text).then(() => {
+        const orig = btn.textContent; btn.textContent = 'Kopierad!';
+        setTimeout(() => { btn.textContent = orig; }, 1400);
+      });
+      track('lead_copy', { company: ad.company, kundtyp: ad.type });
+    });
     document.getElementById('typeSeg').addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       typeFilter = b.dataset.type;
+      track('filter_change', { filter: typeFilter });
       for (const x of document.querySelectorAll('#typeSeg button')) x.classList.toggle('on', x === b);
       renderResults();
+    });
+
+    /* Spara annonsklick: vilken konkurrent, kundtyp och lanktyp */
+    document.getElementById('resultList').addEventListener('click', e => {
+      const a = e.target.closest('a'); if (!a) return;
+      const card = a.closest('.ad'); if (!card) return;
+      const company = (card.querySelector('.company') || {textContent:''}).textContent.split('·')[0].trim();
+      const badge = (card.querySelector('.badge') || {textContent:''}).textContent.trim();
+      track('ad_click', { company: company, kundtyp: badge,
+        destination: a.classList.contains('sec') ? 'platsbanken' : 'company_site' });
     });
 
     renderCompanyGrid();
